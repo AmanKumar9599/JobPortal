@@ -1,0 +1,25 @@
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Node modules
+node_modules/
+
+
+
+# VSCode settings
+.vscode/
+
+# Build folders
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+
+
+# Ignore .env files in both client and server
+client/.env
+server/.env
