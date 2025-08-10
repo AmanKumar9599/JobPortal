@@ -4,19 +4,38 @@ import { useState, useContext } from "react";
 import { AppContext } from "../context/AppContext";
 import { assets } from "../assets/assets";
 import { toast } from "react-hot-toast";
+import axios from 'axios';
 
 const EmpNavbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [show, setShow] = useState(false);
-  const { user, setUser } = useContext(AppContext);
+  const { user, setUser,URI } = useContext(AppContext);
   const navigate = useNavigate();
 
-  const logout = () => {
-    setUser(false);
-    navigate('/');
-    toast.success('Logged out successfully');
-    setShow(false);
-  };
+  const logout = async () => {
+  try {
+    const { data } = await axios.post(
+      `${URI}/api/auth/logout`,
+      {}, // empty body
+      { withCredentials: true } // config with cookies
+    );
+
+    localStorage.removeItem('token');
+
+    if (data.success) {
+      toast.success(data.message);
+      setUser(false);
+      setShow(false);
+      setMenuOpen(false);
+      navigate('/login');
+    }
+  } catch (err) {
+    toast.error("Logout failed");
+    console.log(err);
+  }
+};
+
+
 
   return (
     <nav className="w-full shadow px-4 md:px-10 py-4 bg-white">
@@ -30,7 +49,8 @@ const EmpNavbar = () => {
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center gap-6">
-          <Link to="/employer" className="hover:text-blue-600">Companies</Link>
+          <Link to="/employer"  className="hover:text-blue-600">All Companies</Link>
+          <Link to="/employer/companies" className="hover:text-blue-600"> My Companies</Link>
           <Link to="/employer/add-company" className="hover:text-blue-600">Add Company</Link>
           <Link to="/employer/post-job" className="hover:text-blue-600">Post Job</Link>
           <Link to="/employer/applicants" className="hover:text-blue-600">Applicants</Link>
@@ -70,11 +90,12 @@ const EmpNavbar = () => {
       {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden mt-4 space-y-3">
-          <Link to="/employer" onClick={() => setMenuOpen(false)} className="block">Companies</Link>
-          <Link to="/employer/add-company" onClick={() => setMenuOpen(false)} className="block">Add Company</Link>
-          <Link to="/employer/post-job" onClick={() => setMenuOpen(false)} className="block">Post Job</Link>
-          <Link to="/employer/applicants" onClick={() => setMenuOpen(false)} className="block">Applicants</Link>
-          <Link to="/employer/jobs-list" className="hover:text-blue-600">Jobs</Link>
+          <Link to="/employer" onClick={() => setMenuOpen(false)} className="hover:text-blue-600 block">All Companies</Link>
+          <Link to="/employer/companies" onClick={() => setMenuOpen(false)} className="hover:text-blue-600 block">My Companies</Link>
+          <Link to="/employer/add-company" onClick={() => setMenuOpen(false)} className="hover:text-blue-600 block">Add Company</Link>
+          <Link to="/employer/post-job" onClick={() => setMenuOpen(false)} className="hover:text-blue-600 block">Post Job</Link>
+          <Link to="/employer/applicants" onClick={() => setMenuOpen(false)} className="hover:text-blue-600 block">Applicants</Link>
+          <Link to="/employer/jobs-list" onClick={() => setMenuOpen(false)} className="hover:text-blue-600 block">Jobs</Link>
 
           {user && (
             <p

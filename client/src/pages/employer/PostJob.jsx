@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AppContext } from '../../context/AppContext';
+import toast from 'react-hot-toast'
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const PostJob = () => {
 //   const [companies, setCompanies] = useState(["ABC Company", "XYZ Tech", "DataWorks"]); // Replace with API call if needed
-    const {jobsData} =useContext(AppContext);
-
+    const {jobsData,URI} =useContext(AppContext);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: '',
     company: '',
@@ -27,11 +30,26 @@ const PostJob = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(formData);
-    // Add submit logic here
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const response = await axios.post(`${URI}/api/jobs/post-job`, formData, {
+      withCredentials: true,
+    });
+    if (response.data.success) {
+      toast.success(response.data.message);
+      navigate('/employer/jobs-list');
+      // Optionally reset form here
+    } else {
+      toast.error(response.data.message);
+    }
+  } catch (error) {
+    toast.error('Failed to post job');
+    console.error(error);
+  }
+};
+
 
   return (
     <div className="max-w-4xl mx-auto p-4">
@@ -56,8 +74,8 @@ const PostJob = () => {
         >
           <option value="">Select Company</option>
           {jobsData.map((job) => (
-            <option key={job._id} value={job.company}>
-              {job.company}
+            <option key={job._id} value={job.name}>
+              {job.name}
             </option>
           ))}
         </select>

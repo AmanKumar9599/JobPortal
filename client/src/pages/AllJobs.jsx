@@ -5,12 +5,16 @@ import { useNavigate } from 'react-router-dom';
 
 
 const AllJobs = () => {
-const {jobsData,query} = useContext(AppContext);
+const {allJobs,query} = useContext(AppContext);
 
-let filteredJobs = jobsData.filter(job =>{
-  return job.title.toLowerCase().includes(query.toLowerCase()) || job.company.toLowerCase().includes(query.toLowerCase()) || job.location.toLowerCase().includes(query.toLowerCase()) || Number(job.salary.replace('$', '').replace(',',''))>= Number(query);
+let filteredJobs = allJobs.filter(job => {
+  return (job.title?.toLowerCase().includes(query.toLowerCase()) || false) 
+    || (job.company?.toLowerCase().includes(query.toLowerCase()) || false)
+    || (job.location?.toLowerCase().includes(query.toLowerCase()) || false)
+    || (Number(job.salary?.replace(/\$|,/g, '') || 0) >= Number(query));
+});
 
-})
+
 
 
 

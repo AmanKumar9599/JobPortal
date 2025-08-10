@@ -3,7 +3,7 @@ import { AppContext } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 
 const Jobs = () => {
-  const { jobsData } = useContext(AppContext);
+  const { allJobs } = useContext(AppContext);
   const navigate = useNavigate();
 
   return (
@@ -11,7 +11,7 @@ const Jobs = () => {
       <h1 className="text-3xl font-bold text-center mb-10 text-indigo-700">Featured Jobs</h1>
 
       <div className="w-full flex flex-wrap justify-center gap-6 px-4 md:px-10">
-        {jobsData.map((job) => (
+        {allJobs.map((job) => (
           <div
             key={job._id}
             onClick={() => navigate(`/job-details/${job._id}`)}

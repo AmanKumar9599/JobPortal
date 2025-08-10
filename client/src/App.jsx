@@ -19,6 +19,7 @@ import JobList from './pages/employer/JobList'
 import CompaniesList from './pages/employer/CompaniesList'
 import EmpNavbar from './components/EmpNavbar'
 import EmpFooter from './components/EmpFooter'
+import AllCompanies from './pages/employer/AllCompanies'
 
 const App = () => {
   const employerPath=useLocation().pathname.includes('/employer');
@@ -43,11 +44,12 @@ const App = () => {
 
         {/* employer layout */}
         <Route path='/employer' element={<EmployerLayout/>}>
-        <Route index element={<CompaniesList/>}/>
+        <Route index element={<AllCompanies/>}/>
         <Route path='add-company' element={<AddCompany/>}/>
         <Route path='post-job' element={<PostJob/>}/>
         <Route path='applicants' element={<Applicants/>}/>
         <Route path='jobs-list' element={<JobList/>}/>
+        <Route path='companies' element={<CompaniesList/>}/>
         </Route>
       </Routes>
 

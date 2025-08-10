@@ -26,7 +26,9 @@ const Login = () => {
     e.preventDefault();
     // console.log(formData);
     try{
-    const {data} = await axios.post(`${URI}/api/auth/login`,formData);
+    const {data} = await axios.post(`${URI}/api/auth/login`,formData,{
+      withCredentials: true
+    });
     if(data.success){
       setUser(data.user);
       if(data.user.role==='employer'){
@@ -41,6 +43,7 @@ const Login = () => {
     }
   }catch(err){
     toast.error(err.response.data.message);
+    console.error("Login error:", err);
   }
 }
 

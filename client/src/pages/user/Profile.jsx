@@ -1,44 +1,86 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { AppContext } from '../../context/AppContext';
+import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
+  const navigate = useNavigate();
+  const { user, URI, axios, setUser } = useContext(AppContext);
+
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    location: "",
-    education: "",
-    experience: "",
-    skills: "",
-    about: "",
+    name: '',
+    email: '',
+    phone: '',
+    location: '',
+    education: '',
+    experience: '',
+    skills: '',
+    about: '',
     resume: null,
     image: null,
   });
 
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        location: user.location || '',
+        education: user.education || '',
+        experience: user.experience || '',
+        skills: user.skills || '',
+        about: user.bio || '',
+        resume: user.resume || null,
+        image: user.image || null,
+      });
+    }
+  }, [user]);
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    setFormData({
-      ...formData,
-      [name]: files ? files[0] : value,
-    });
+    if (files) {
+      setFormData({ ...formData, [name]: files[0] });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      const formPayload = new FormData();
+      for (const key in formData) {
+        if (formData[key]) {
+          formPayload.append(key, formData[key]);
+        }
+      }
 
-    const data = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      data.append(key, value);
-    });
+      const { data } = await axios.put(`${URI}/api/user/update-profile`, formPayload, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-    console.log("FormData ready to be sent:", formData);
-    // Axios or fetch logic to send `data` goes here
+      if (data?.user) {
+        setUser(data.user);
+        toast.success('Profile updated successfully!');
+        navigate('/');
+      } else {
+        toast.error(data?.message || 'Failed to update profile');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Something went wrong while updating profile');
+    }
   };
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-md mt-10">
       <h2 className="text-2xl font-bold mb-6 text-center">Profile Information</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Text inputs */}
+        {/* Text Fields */}
         {['name', 'email', 'phone', 'location', 'education', 'experience', 'skills'].map((field) => (
           <div key={field}>
             <label className="block text-gray-700 capitalize">{field}</label>
@@ -77,6 +119,15 @@ const Profile = () => {
             onChange={handleChange}
             className="w-full mt-1"
           />
+          {formData.resume && typeof formData.resume === 'string' && (
+            <a
+              href={formData.resume}
+              target="_blank"
+              className="text-blue-600 mt-2 inline-block"
+            >
+              View Current Resume
+            </a>
+          )}
         </div>
 
         {/* Image Upload */}
@@ -91,7 +142,11 @@ const Profile = () => {
           />
           {formData.image && (
             <img
-              src={URL.createObjectURL(formData.image)}
+              src={
+                formData.image instanceof File
+                  ? URL.createObjectURL(formData.image)
+                  : formData.image
+              }
               alt="Preview"
               className="mt-2 w-32 h-32 object-cover rounded-md border"
             />

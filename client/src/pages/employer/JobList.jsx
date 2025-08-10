@@ -1,8 +1,32 @@
 import React, { useContext } from 'react';
 import { AppContext } from '../../context/AppContext';
+import Loading from '../../components/Loading';
+import toast from 'react-hot-toast';
+import axios from 'axios';
 
 const JobList = () => {
-  const { jobsData } = useContext(AppContext);
+  const { jobList,setJobList,loadingJobs,URI } = useContext(AppContext);
+  if(loadingJobs){
+    return <Loading />
+  }
+
+  const handleDelete = async (jobId)=>{
+    try {
+      const { data } = await axios.delete(`${URI}/api/jobs/delete-job/${jobId}`, {
+        withCredentials: true
+      });
+
+      if (data.success) {
+        setJobList(prev => prev.filter(c => c._id !== jobId)); // ✅ latest state
+        toast.success(data.message || "Job deleted successfully");
+      } else {
+        toast.error(data.message || "Failed to delete job");
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      toast.error("Error deleting job");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-purple-100 p-4">
@@ -20,7 +44,7 @@ const JobList = () => {
             </tr>
           </thead>
           <tbody>
-            {jobsData.map((job, index) => (
+            {jobList.map((job, index) => (
               <tr key={index} className="border-t hover:bg-gray-50">
                 <td className="px-4 py-3">{job.title}</td>
                 <td className="px-4 py-3">{job.company}</td>
@@ -28,13 +52,13 @@ const JobList = () => {
                 <td className="px-4 py-3">{job.location}</td>
                 <td className="px-4 py-3 text-green-700 font-medium">{job.salary}</td>
                 <td className="px-4 py-3">
-                  <button className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-1 rounded cursor-pointer">
+                  <button onClick={() => handleDelete(job._id)} className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-1 rounded cursor-pointer">
                     Delete
                   </button>
                 </td>
               </tr>
             ))}
-            {jobsData.length === 0 && (
+            {jobList.length === 0 && (
               <tr>
                 <td colSpan="6" className="text-center py-6 text-gray-500">
                   No jobs available

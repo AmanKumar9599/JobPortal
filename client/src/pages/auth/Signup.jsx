@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import { useContext } from 'react';
-import {toast} from 'react-toastify';
+import {toast} from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 // import axios from 'axios';
 
@@ -24,7 +24,7 @@ const Signup = () => {
     if (name === 'image') {
       setFormData({
         ...formData,
-        image: files[0],
+        [name]: files[0],
       });
     } else {
       setFormData({
@@ -36,29 +36,35 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try{
-      const formPayload = new FormData();
-      formPayload.append('name', formData.name);
-      formPayload.append('email',formData.email);
-      formPayload.append('role',formData.role);
-      formPayload.append('password',formData.password);
-      if (formData.image) {
+    const formPayload = new FormData();
+    formPayload.append('name', formData.name);
+    formPayload.append('email',formData.email);
+    formPayload.append('role',formData.role);
+    formPayload.append('password',formData.password);
+    if (formData.image) {
       formPayload.append('image', formData.image);
     }
+    try{
 
-      const {data} = await axios.post(`${URI}/api/auth/register`, formPayload);
+      const {data} = await axios.post(`${URI}/api/auth/register`, formPayload,{
+       withCredentials: true,
+       headers: {
+         'Content-Type': 'multipart/form-data'
+       }
+      });
       console.log("Signup response:", data);
       if(data.success){
         toast.success(data.message);
         navigate('/login');
       }
       else{
-        toast.error(data.message);
+        toast.success("user already exists");
         console.log('eror in signup:', data);
       }
     }
     catch(err){
-      toast.error(err.response.data.message);
+      console.log(err)
+      toast.error("user already exists");
     }
   };
 

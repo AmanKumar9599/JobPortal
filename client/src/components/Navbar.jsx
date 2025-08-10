@@ -26,13 +26,16 @@ const Navbar = () => {
 
   const logout = async()=>{
     try {
-      const { data } = await axios.post(`${URI}/api/auth/logout`, {
+      const { data } = await axios.post(`${URI}/api/auth/logout`, {}, {
         withCredentials: true
       });
+        localStorage.removeItem('user');
 
       if (data.success) {
         toast.success(data.message);
         setUser(false);
+        setShow(false);
+        setMenuOpen(false);
         navigate('/login');
       }
     } catch (err) {
@@ -81,7 +84,7 @@ const Navbar = () => {
 
           {user && (
             <div onClick={() => setShow(!show)} className="rounded-full cursor-pointer">
-              <img src={assets.user_profile} alt="User Profile" className="w-8 h-8 rounded-full" />
+              <img src={user.image||assets.user_profile} alt="User Profile" className="w-8 h-8 rounded-full" />
             </div>
           )}
         </div>

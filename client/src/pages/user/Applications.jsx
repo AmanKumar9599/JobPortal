@@ -1,16 +1,23 @@
 import React, { useContext } from 'react';
 import { AppContext } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const Applications = () => {
-  const { jobsData } = useContext(AppContext);
+  const { appliedJobs } = useContext(AppContext);
   const navigate = useNavigate();
+
+  const statusColors = {
+    Pending: 'bg-yellow-100 text-yellow-600',
+    Rejected: 'bg-red-100 text-red-600',
+    Accepted: 'bg-green-200 text-green-700'
+  };
 
   return (
     <div className="px-4 py-10 sm:px-10 min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100">
       <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">Applied Jobs</h1>
 
-      {jobsData.length > 0 ? (
+      {appliedJobs.length > 0 ? (
         <div className="overflow-x-auto bg-white shadow-md rounded-2xl">
           <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
             <thead className="bg-gray-100 text-gray-600">
@@ -24,34 +31,35 @@ const Applications = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {jobsData.map((job, index) => (
-                <tr
-                  key={index}
-                  onClick={() => navigate(`/job-details/${job._id}`)}
-                  className="hover:bg-gray-50 cursor-pointer transition"
-                >
-                  <td className="px-6 py-4 text-gray-800 truncate">{job.title}</td>
-                  <td className="px-6 py-4 text-gray-700">{job.company}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold 
-                      ${job.type === 'Full-time' ? 'bg-cyan-100 text-cyan-600' :
-                        job.type === 'Part-time' ? 'bg-indigo-100 text-indigo-600' :
-                        'bg-gray-200 text-gray-600'}`}>
-                      {job.type}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">{job.location}</td>
-                  <td className="px-6 py-4">{job.salary}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold 
-                      ${job.status === 'Accepted' ? 'bg-green-100 text-green-600' :
-                        job.status === 'Rejected' ? 'bg-red-100 text-red-600' :
-                        'bg-yellow-100 text-yellow-600'}`}>
-                      {job.status || 'Pending'}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {appliedJobs.map((app, index) => {
+                const status = app.status || 'pending';
+                return (
+                  <tr
+                    key={index}
+                    onClick={() => navigate(`/job-details/${app.job?._id}`)}
+                    className="hover:bg-gray-50 cursor-pointer transition"
+                  >
+                    <td className="px-6 py-4 text-gray-800 truncate">{app.job?.title || "N/A"}</td>
+                    <td className="px-6 py-4 text-gray-700">{app.job?.company || "N/A"}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold 
+                        ${app.job?.type === 'Full-time' ? 'bg-cyan-100 text-cyan-600' :
+                          app.job?.type === 'Part-time' ? 'bg-indigo-100 text-indigo-600' :
+                          'bg-gray-200 text-gray-600'}`}>
+                        {app.job?.type || "N/A"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">{app.job?.location || "N/A"}</td>
+                    <td className="px-6 py-4">{app.job?.salary || "N/A"}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold 
+                        ${statusColors[status] || 'bg-gray-100 text-gray-600'}`}>
+                        {status}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -1,32 +1,37 @@
-import React, { useContext } from 'react';
+import React, { useContext,useEffect } from 'react';
 import { AppContext } from '../../context/AppContext';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import Loading from '../../components/Loading';
 
 const CompaniesList = () => {
-  const { jobsData, setJobsData } = useContext(AppContext);
+  const { employerCompanies, setEmployerCompanies, URI, loadingJobs } = useContext(AppContext);
 
-  // Get unique companies with their logo and about from jobsData
-  const uniqueCompanies = [];
-  const seen = new Set();
+  if (loadingJobs) {
+    return <Loading />;
+  }
 
-  jobsData.forEach(job => {
-    if (!seen.has(job.company)) {
-      seen.add(job.company);
-      uniqueCompanies.push({
-        name: job.company,
-        image: job.image,
-        description: job.description,
+  const handleDelete = async (companyId) => {
+    try {
+      const { data } = await axios.delete(`${URI}/api/company/delete/${companyId}`, {
+        withCredentials: true
       });
-    }
-  });
 
-  const handleDelete = (companyName) => {
-    const filteredJobs = jobsData.filter(job => job.company !== companyName);
-    setJobsData(filteredJobs);
+      if (data.success) {
+        setEmployerCompanies(prev => prev.filter(c => c._id !== companyId)); // ✅ latest state
+        toast.success(data.message || "Company deleted successfully");
+      } else {
+        toast.error(data.message || "Failed to delete company");
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      toast.error("Error deleting company");
+    }
   };
 
   return (
     <div className="p-4">
-      <h2 className="text-3xl font-bold mb-6 text-center">All Companies</h2>
+      <h2 className="text-3xl font-bold mb-6 text-center">My Companies</h2>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white rounded-lg shadow-md">
           <thead className="bg-gray-200">
@@ -38,27 +43,31 @@ const CompaniesList = () => {
             </tr>
           </thead>
           <tbody>
-            {uniqueCompanies.map((company, index) => (
-              <tr key={index} className="border-t">
+            {employerCompanies.length>0?employerCompanies.map((company) => (
+              <tr key={company._id} className="border-t">
                 <td className="px-4 py-3">
                   <img
-                    src={company.image}
+                    src={company.logo}
                     alt={company.name}
                     className="w-10 h-10 object-contain"
                   />
                 </td>
                 <td className="px-4 py-3 font-semibold">{company.name}</td>
-                <td className="px-4 py-3 text-gray-600">{company.description}</td>
+                <td className="px-4 py-3 text-gray-600">{company.about}</td>
                 <td className="px-4 py-3">
                   <button
-                    onClick={() => handleDelete(company.name)}
+                    onClick={() => handleDelete(company._id)}
                     className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 cursor-pointer"
                   >
                     Delete
                   </button>
                 </td>
               </tr>
-            ))}
+            )):(
+              <tr>
+                <td colSpan="4" className="text-center py-4">No companies found</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
