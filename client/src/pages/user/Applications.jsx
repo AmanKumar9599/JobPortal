@@ -2,10 +2,14 @@ import React, { useContext } from 'react';
 import { AppContext } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import Loading from '../../components/Loading';
 
 const Applications = () => {
-  const { appliedJobs } = useContext(AppContext);
+  const { appliedJobs,loadingJobs } = useContext(AppContext);
   const navigate = useNavigate();
+  if(loadingJobs){
+    return <Loading/>
+  }
 
   const statusColors = {
     Pending: 'bg-yellow-100 text-yellow-600',

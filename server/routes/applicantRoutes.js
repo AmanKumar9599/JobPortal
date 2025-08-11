@@ -3,7 +3,8 @@ const {
   applyForJob,
   getApplications,
   updateApplicationStatus,
-  fetchAppliedJobs
+  fetchAppliedJobs,
+  checkIfApplied
 } = require('../controllers/applicantController');
 
 const auth= require('../middleware/auth'); // to get req.user
@@ -13,5 +14,6 @@ router.post('/apply', auth, applyForJob);
 router.get('/applicants', auth, getApplications);
 router.patch('/:id/status', auth, updateApplicationStatus);
 router.get('/applied-jobs',auth,fetchAppliedJobs);
+router.get('/check/:id',auth,checkIfApplied);
 
 module.exports = router;

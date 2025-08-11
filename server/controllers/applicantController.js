@@ -8,13 +8,11 @@ const applyForJob = async (req, res) => {
   const userId = req.user._id;
 
   try {
-    // 1. Check job
     const job = await Job.findById(jobId);
     if (!job) {
       return res.status(404).json({ success: false, message: "Job not found" });
     }
 
-    // 2. Check profile completeness
     const user = await User.findById(userId);
     if (!user.phone || !user.resume) {
       return res.status(400).json({
@@ -23,17 +21,15 @@ const applyForJob = async (req, res) => {
       });
     }
 
-    // 3. Check if already applied
     const existingApplication = await Application.findOne({ job: jobId, user: userId });
     if (existingApplication) {
       return res.status(400).json({ success: false, message: "You have already applied for this job" });
     }
 
-    // 4. Create application
     const application = new Application({
       job: jobId,
       user: userId,
-      status: "pending",
+      status: "Pending",
       appliedAt: new Date()
     });
 
@@ -45,9 +41,13 @@ const applyForJob = async (req, res) => {
       application
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Error applying for job", error });
+    console.error('Error in applyForJob:', error);
+    res.status(500).json({ success: false, message: "Error applying for job", error: error.message });
   }
 };
+
+
+
 
 // Get applications for employer's jobs
 const getApplications = async (req, res) => {
@@ -143,9 +143,27 @@ const fetchAppliedJobs = async (req,res) =>{
 }
 
 
+const checkIfApplied = async (req, res) => {
+  try {
+    const userId = req.user.id;  // assuming you get user id from auth middleware
+    const jobId = req.params.id;
+
+    // Check if application exists
+    const applied = await Application.exists({ user: userId, job: jobId });
+
+    res.status(200).json({ success: true, applied });
+  } catch (error) {
+    console.error('Error checking application:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+
+
 module.exports = {
   applyForJob,
   getApplications,
   updateApplicationStatus,
-  fetchAppliedJobs
+  fetchAppliedJobs,
+  checkIfApplied
 };

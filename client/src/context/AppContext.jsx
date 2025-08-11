@@ -22,6 +22,7 @@ export const AppContextProvider = ({children})=>{
     const [jobList,setJobList] = useState([]);
     const [allJobs,setAllJobs] = useState([]);
     const [appliedJobs,setAppliedJobs] = useState([]);
+    const [loadingUser, setLoadingUser] = useState(true);
 
     // get logged in user
         const fetchLoggedInUser = async () => {
@@ -39,6 +40,9 @@ export const AppContextProvider = ({children})=>{
          console.log("User data:", data.user);
        } catch (error) {
          console.error('Error fetching logged in user:', error);
+       }
+       finally{
+        setLoadingUser(false);
        }
      };
 
@@ -254,7 +258,8 @@ const updateApplicantStatus = async (applicantId, status) => {
         setApplicants,
         fetchApplicants,
         updateApplicantStatus,
-        appliedJobs
+        appliedJobs,
+        loadingUser
 
     }
     return(
