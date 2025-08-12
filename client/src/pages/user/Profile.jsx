@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../context/AppContext';
 import toast from 'react-hot-toast';
 
-
 const Profile = () => {
   const { user, URI, axios, setUser } = useContext(AppContext);
 
@@ -15,11 +14,9 @@ const Profile = () => {
     experience: '',
     skills: '',
     about: '',
-    resume: null,
+    resume: '',
     image: null,
   });
-
-  const [numPages, setNumPages] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -32,7 +29,7 @@ const Profile = () => {
         experience: user.experience || '',
         skills: user.skills || '',
         about: user.bio || '',
-        resume: user.resume || null,
+        resume: user.resume || '',
         image: user.image || null,
       });
     }
@@ -40,22 +37,27 @@ const Profile = () => {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (files) {
-      setFormData({ ...formData, [name]: files[0] });
+    if (name === 'image' && files) {
+      setFormData({ ...formData, image: files[0] });
     } else {
       setFormData({ ...formData, [name]: value });
     }
   };
 
- 
-  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const formPayload = new FormData();
       for (const key in formData) {
         if (formData[key]) {
-          formPayload.append(key, formData[key]);
+          if (key === 'resume') {
+            // Resume is a URL string, send as normal field
+            formPayload.append(key, formData[key]);
+          } else if (key === 'image' && formData.image instanceof File) {
+            formPayload.append(key, formData.image);
+          } else if (key !== 'image') {
+            formPayload.append(key, formData[key]);
+          }
         }
       }
 
@@ -110,15 +112,16 @@ const Profile = () => {
         </div>
 
         <div>
-          <label className="block text-gray-700">Resume (PDF)</label>
+          <label className="block text-gray-700">Resume (Google Drive Link)</label>
           <input
-            type="file"
+            type="url"
             name="resume"
-            accept=".pdf"
+            value={formData.resume}
             onChange={handleChange}
-            className="w-full mt-1"
+            className="w-full mt-1 p-2 border rounded-md"
+            placeholder="Share your resume (Google Drive link)"
           />
-          {formData.resume && typeof formData.resume === 'string' && (
+          {formData.resume && (
             <div className="mt-2">
               <a
                 href={formData.resume}
@@ -128,10 +131,6 @@ const Profile = () => {
               >
                 View Current Resume (Open in new tab)
               </a>
-
-        
-                 
-
             </div>
           )}
         </div>

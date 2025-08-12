@@ -17,11 +17,20 @@ const getLoggedInUser = async(req, res) => {
   }
 };
 
-
 const updateProfile = async (req, res) => {
   try {
     const { id } = req.user;
-    const { name, email, location, about, education, skills, experience, phone } = req.body;
+    const {
+      name,
+      email,
+      location,
+      about,
+      education,
+      skills,
+      experience,
+      phone,
+      resume, // Now resume can be a string (Google Drive link)
+    } = req.body;
 
     const updates = {
       name,
@@ -34,7 +43,12 @@ const updateProfile = async (req, res) => {
       phone,
     };
 
-    // Image Upload
+    // If resume is provided as string (Google Drive link), save it directly
+    if (resume && typeof resume === 'string') {
+      updates.resume = resume;
+    }
+
+    // Image Upload (if file given)
     if (req.files?.image) {
       const result = await cloudinary.uploader.upload(
         req.files.image.tempFilePath,
@@ -44,18 +58,6 @@ const updateProfile = async (req, res) => {
         }
       );
       updates.image = result.secure_url;
-    }
-
-    // Resume Upload
-    if (req.files?.resume) {
-      const result = await cloudinary.uploader.upload(
-        req.files.resume.tempFilePath,
-        {
-          resource_type: 'raw',
-          folder: 'resumes',
-        }
-      );
-      updates.resume = result.secure_url;
     }
 
     const updatedUser = await User.findByIdAndUpdate(id, updates, {
