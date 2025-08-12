@@ -1,9 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../context/AppContext';
-import { Document, Page, pdfjs } from 'react-pdf';
+import toast from 'react-hot-toast';
 
-// Set PDF worker source
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const Profile = () => {
   const { user, URI, axios, setUser } = useContext(AppContext);
@@ -49,16 +47,8 @@ const Profile = () => {
     }
   };
 
-  const onDocumentLoadSuccess = ({ numPages }) => {
-    setNumPages(numPages);
-  };
-
-  // Add ?dl=1 for direct PDF link if resume is from Cloudinary
-  const pdfUrl =
-    formData.resume && formData.resume.includes('cloudinary')
-      ? formData.resume + '?dl=1'
-      : formData.resume;
-
+ 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -78,13 +68,13 @@ const Profile = () => {
 
       if (data?.user) {
         setUser(data.user);
-        alert('Profile updated successfully!');
+        toast.success('Profile updated successfully!');
       } else {
-        alert(data?.message || 'Failed to update profile');
+        toast.error(data?.message || 'Failed to update profile');
       }
     } catch (err) {
       console.error(err);
-      alert('Something went wrong while updating profile');
+      toast.error('Something went wrong while updating profile');
     }
   };
 
@@ -139,17 +129,9 @@ const Profile = () => {
                 View Current Resume (Open in new tab)
               </a>
 
-              <div className="border" style={{ width: '100%', height: 600, overflow: 'auto' }}>
-                <Document
-                  file={pdfUrl}
-                  onLoadSuccess={onDocumentLoadSuccess}
-                  loading="Loading PDF..."
-                >
-                  {Array.from(new Array(numPages), (el, index) => (
-                    <Page key={`page_${index + 1}`} pageNumber={index + 1} width={600} />
-                  ))}
-                </Document>
-              </div>
+        
+                 
+
             </div>
           )}
         </div>
