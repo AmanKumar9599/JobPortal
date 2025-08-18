@@ -29,7 +29,7 @@ const updateProfile = async (req, res) => {
       skills,
       experience,
       phone,
-      resume, // Now resume can be a string (Google Drive link)
+      resume, 
     } = req.body;
 
     const updates = {
